@@ -8,24 +8,24 @@ import {
     VersionColumn,
     OneToOne,
     JoinColumn,
-} from "typeorm";
-import { NextcloudUser } from "./NextcloudUser";
+} from 'typeorm';
+import { NextcloudUser } from './NextcloudUser';
 
 @Entity()
 export class NextcloudToken extends BaseEntity {
     @PrimaryGeneratedColumn()
     private id: number;
     
-    @Column("varchar", { length: 1024 })
+    @Column('varchar', { length: 1024 })
     accessToken: string;
 
-    @Column("varchar", { length: 1024 })
+    @Column('varchar', { length: 1024 })
     refreshToken: string;
 
-    @Column("varchar", { length: 63 })
+    @Column('varchar', { length: 63 })
     tokenType: string;
 
-    @Column("datetime")
+    @Column('datetime')
     private expires: Date;
     set expiresIn(expiresIn: string) {
         this.expires = new Date((Date.now() / 1000 + +expiresIn) * 1000);

@@ -1,6 +1,6 @@
-import "reflect-metadata";
-import { createConnection } from "typeorm";
-import { NextcloudUser } from "./entity/NextcloudUser";
+import 'reflect-metadata';
+import { createConnection } from 'typeorm';
+import { NextcloudUser } from './entity/NextcloudUser';
 import express from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
@@ -9,19 +9,19 @@ createConnection().then(async connection => {
     const app = express();
     NextcloudUser.prepare(app);
 
-    app.get("/auth/nextcloud", NextcloudUser.authCallback);
-    app.get("/auth/nextcloud/grant", NextcloudUser.authGrantCallback);
+    app.get('/auth/nextcloud', NextcloudUser.authCallback);
+    app.get('/auth/nextcloud/grant', NextcloudUser.authGrantCallback);
 
     app.listen(8080, err => {
         if (!err) {
-            console.log("Server listening on 8080");
+            console.log('Server listening on 8080');
         } else {
-            console.error("Server Error: " + err);
+            console.error('Server Error: ' + err);
         }
     });
 
     const user = await NextcloudUser.getAllUser();
-    console.log("User: " + JSON.stringify(user, null, 4));
+    console.log('User: ' + JSON.stringify(user, null, 4));
 
 
     app.get('/test', async (req, res) => {
@@ -56,7 +56,7 @@ createConnection().then(async connection => {
                         str = 'No Event';
                     }
 
-                    res.status(200).send(str + "\n");
+                    res.status(200).send(str + '\n');
                     console.log(str);
                 } else {
                     res.status(response.statusCode).send(response.statusMessage);

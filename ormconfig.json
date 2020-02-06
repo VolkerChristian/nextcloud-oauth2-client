@@ -1,0 +1,24 @@
+{
+   "type": "mysql",
+   "host": "proliant.home.vchrist.at",
+   "port": 3306,
+   "username": "wastereminder",
+   "password": "!!!SoMaSi01!!!",
+   "database": "WasteReminder",
+   "synchronize": true,
+   "logging": false,
+   "entities": [
+      "src/entity/**/*.{ts,js}"
+   ],
+   "migrations": [
+      "src/migration/**/*.{ts,js}"
+   ],
+   "subscribers": [
+      "src/subscriber/**/*.{ts,js}"
+   ],
+   "cli": {
+      "entitiesDir": "src/entity",
+      "migrationsDir": "src/migration",
+      "subscribersDir": "src/subscriber"
+   }
+}

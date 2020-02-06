@@ -1,0 +1,23 @@
+{
+    "appConfig": {
+        "clientId": "kN3HXYKqIvoXFJD6maV56WAI9moMbvxIx68rqiRjwSc6f9G7aNvK3oAXSZ4wNHo8",
+        "clientSecret": "Z5bv7HAyCMnoC2o7oLDbS114suHHnHesBEMptvs7TemYv5NgR4dV9gOgnrhO5KHL",
+        "accessTokenUri": "https://cloud.vchrist.at/index.php/apps/oauth2/api/v1/token",
+        "authorizationUri": "https://cloud.vchrist.at/index.php/apps/oauth2/authorize",
+        "redirectUri": "http://calisto.home.vchrist.at:8080/auth/nextcloud/grant",
+        "scopes": []
+    },
+    "cookieOptions": {
+    },
+    "cookieOptionValues": {
+        "domain": "nextcloudConfig.cookieData.domain",
+        "encode": "function to encode cookie values",
+        "path": "nextcloudConfig.cookieData.path",
+        "httpOnly": true,
+        "secure": false,
+        "maxAge": 600000,
+        "expires": "Date.now() + 600000",
+        "signed": false,
+        "sameSite": false
+    }
+}

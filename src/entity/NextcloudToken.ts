@@ -1,6 +1,5 @@
 import {
     Entity,
-    BaseEntity,
     PrimaryGeneratedColumn,
     Column,
     UpdateDateColumn,
@@ -12,9 +11,9 @@ import {
 import { NextcloudUser } from './NextcloudUser';
 
 @Entity()
-export class NextcloudToken extends BaseEntity {
+export class NextcloudToken {
     @PrimaryGeneratedColumn()
-    private id: number;
+    id: number;
     
     @Column('varchar', { length: 1024 })
     accessToken: string;
@@ -27,6 +26,7 @@ export class NextcloudToken extends BaseEntity {
 
     @Column('datetime')
     private expires: Date;
+    
     set expiresIn(expiresIn: string) {
         this.expires = new Date((Date.now() / 1000 + +expiresIn) * 1000);
     }

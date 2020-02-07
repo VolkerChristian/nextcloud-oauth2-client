@@ -4,7 +4,6 @@ import {
     PrimaryGeneratedColumn,
     Column,
     Index,
-    BaseEntity,
     UpdateDateColumn,
     CreateDateColumn,
     VersionColumn,
@@ -22,26 +21,37 @@ import {
     CookieOptions
 } from 'express';
 import * as nextcloudConfig from '../../ncconfig.json';
-import { inspect } from 'util';
-import cookieParser from 'cookie-parser';
+
+interface Handler {
+    (req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token): void;
+}
+
+interface CookieData {
+    state: string,
+    timeout: NodeJS.Timer,
+    handler: Handler
+}
 
 interface CookieStore {
-    [key: string]: {
-        state: string,
-        timeout: NodeJS.Timer
-    }
+    [key: string]: CookieData
 };
 
 @Entity()
-export class NextcloudUser extends BaseEntity {
+export class NextcloudUser {
     constructor(userName: string) {
-        super();
         this.userName = userName;
         this.token = new NextcloudToken();
     }
 
+    updateToken(tokenData: ClientOAuth2.Data) {
+        this.token.accessToken = tokenData.access_token;
+        this.token.refreshToken = tokenData.refresh_token;
+        this.token.expiresIn = tokenData.expires_in;
+        this.token.tokenType = tokenData.token_type;
+    }
+
     @PrimaryGeneratedColumn()
-    private id: number;
+    id: number;
 
     @Column('varchar', { length: 63 })
     @Index('userName', { unique: true })
@@ -61,16 +71,13 @@ export class NextcloudUser extends BaseEntity {
     })
     token: NextcloudToken;
 
-    private static nextcloudAuth: ClientOAuth2 = new ClientOAuth2(nextcloudConfig.appConfig);
 
-    static prepare(app: import('express-serve-static-core').Express) {
-        app.use(cookieParser());
-    }
+    private static nextcloudAuth: ClientOAuth2 = new ClientOAuth2(nextcloudConfig.oauth2Config);
 
 
     static getUser(userName: string) {
         return new Promise<NextcloudUser>((resolve, reject) => {
-            getConnection().getRepository<NextcloudUser>('NextcloudUser')
+            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
                 .createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
@@ -83,18 +90,16 @@ export class NextcloudUser extends BaseEntity {
                 )
                 .getOne()
                 .then((user) => {
-                    if (!user) {
-                        user = new NextcloudUser(userName);
-                    }
                     resolve(user)
                 })
                 .catch((reason) => reject(reason))
         });
     }
 
+
     static getAllUser() {
         return new Promise<NextcloudUser[]>((resolve, reject) => {
-            getConnection().getRepository<NextcloudUser>('NextcloudUser')
+            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
                 .createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
@@ -120,11 +125,8 @@ export class NextcloudUser extends BaseEntity {
             if (token.expired()) {
                 token.refresh()
                     .then(token => {
-                        this.token.accessToken = token.data.access_token;
-                        this.token.refreshToken = token.data.refresh_token;
-                        this.token.expiresIn = token.data.expires_in;
-                        this.token.tokenType = token.data.token_type;
-                        this.save()
+                        this.updateToken(token.data);
+                        getConnection('nextcloud').createEntityManager().save(this)
                             .then(() => resolve(token))
                             .catch(reason => reject(reason));
                     })
@@ -148,13 +150,47 @@ export class NextcloudUser extends BaseEntity {
     };
 
 
+    private static linkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+        if (!user) {
+            user = new NextcloudUser(token.data.user_id);
+        }
+        user.updateToken(token.data);
+
+        getConnection('nextcloud').getRepository(NextcloudUser).save(user)
+            .then(() => {
+                console.log('User "' + token.data.user_id + '" linked');
+                res.status(201).send('User "' + token.data.user_id + '" linked');
+            })
+            .catch(reason => {
+                console.error(reason + ': Processing User: ' + token.data.user_id);
+                res.status(500).send(reason + ': Processing User: ' + token.data.user_id);
+            });
+    }
+
+
+    private static unlinkRequestHandler(_req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+        if (user) {
+            getConnection('nextcloud').getRepository(NextcloudUser).remove(user)
+                .then(() => {
+                    console.log('User "' + token.data.user_id + '" unlinked');
+                    res.status(201).send('User "' + token.data.user_id + '" unlinked');
+                })
+                .catch(reason => {
+                    console.error(reason + ': Processing User: ' + token.data.user_id);
+                    res.status(500).send(reason + ': Processing User: ' + token.data.user_id);
+                });
+        } else {
+            console.error('Can not unlink user "' + token.data.user_id + '" - not linked!');
+            res.status(400).send('Can not unlink user "' + token.data.user_id + '" - not linked!')
+        }
+    }
+
+
     private static cookieStore: CookieStore = {};
 
-    static authCallback(req: Request, res: Response) {
+    static oauth2AuthRedirect(_req: Request, res: Response, handler: Handler) {
         const cookie = uuid();
-        const cookieOptions: CookieOptions = nextcloudConfig.cookieOptions;
-
-        res.cookie('grant', cookie, cookieOptions);
+        res.cookie('auth', cookie, nextcloudConfig.cookieOptions);
 
         const timeout = setTimeout(cookie => {
             console.log('Cookie ' + cookie + ' expired.');
@@ -163,52 +199,55 @@ export class NextcloudUser extends BaseEntity {
 
         NextcloudUser.cookieStore[cookie] = {
             state: uuid(),
-            timeout: timeout
+            timeout: timeout,
+            handler: handler
         };
 
-        console.log('Response grant-cookie: ' + JSON.stringify(cookie, null, 4));
-        console.log('Response state of grant-cookie: ' + JSON.stringify(NextcloudUser.cookieStore[cookie].state, null, 4));
+        console.log('Response auth-cookie: ' + JSON.stringify(cookie, null, 4));
+        console.log('Response state of auth-cookie: ' + JSON.stringify(NextcloudUser.cookieStore[cookie].state, null, 4));
 
         res.redirect(NextcloudUser.nextcloudAuth.code.getUri({ state: NextcloudUser.cookieStore[cookie].state }));
     }
 
 
-    static authGrantCallback(req: Request, res: Response) {
-        if (req.cookies.grant && NextcloudUser.cookieStore[req.cookies.grant]) {
-            const state = NextcloudUser.cookieStore[req.cookies.grant].state;
+    static oauth2Link(req: Request, res: Response) {
+        NextcloudUser.oauth2AuthRedirect(req, res, NextcloudUser.linkRequestHandler);
+    }
 
-            console.log('Request cookie: ' + JSON.stringify(req.cookies, null, 4));
-            console.log('Request state of grant-cookie: ' + JSON.stringify(state));
 
-            clearTimeout(NextcloudUser.cookieStore[req.cookies.grant].timeout);
-            delete NextcloudUser.cookieStore[req.cookies.grant];
+    static oauth2Unlink(req: Request, res: Response) {
+        NextcloudUser.oauth2AuthRedirect(req, res, NextcloudUser.unlinkRequestHandler);
+    }
 
-            const cookieOptions: CookieOptions = nextcloudConfig.cookieOptions;
-            cookieOptions.expires = new Date(1);
-            res.clearCookie('grant', cookieOptions);
+
+    static oauth2Redirect(req: Request, res: Response) {
+        if (req.cookies.auth && NextcloudUser.cookieStore[req.cookies.auth]) {
+            res.clearCookie('auth', nextcloudConfig.cookieOptions);
+
+            const cookieData = NextcloudUser.cookieStore[req.cookies.auth];
+            delete NextcloudUser.cookieStore[req.cookies.auth];
+
+            const state = cookieData.state;
+            clearTimeout(cookieData.timeout);
 
             NextcloudUser.nextcloudAuth.code.getToken(req.originalUrl, { state: state })
-                .then(async token => {
-                    console.log('Token: ' + inspect(token));
-                    try {
-                        const user = await NextcloudUser.getUser(token.data.user_id);
-                        user.token.accessToken = token.data.access_token;
-                        user.token.refreshToken = token.data.refresh_token;
-                        user.token.expiresIn = token.data.expires_in;
-                        user.token.tokenType = token.data.token_type;
-                        await user.save();
-                        res.status(201).send('User "' + token.data.user_id + '" provisioned');
-                    } catch (reason) {
-                        res.status(500).send(reason + ': Provisioning User: ' + token.data.user_id);
-                    }
+                .then(token => {
+                    NextcloudUser.getUser(token.data.user_id)
+                        .then(user => {
+                            cookieData.handler(req, res, user, token);
+                        })
+                        .catch(reason => {
+                            console.error(reason);
+                            res.status(500).send(reason);
+                        });
                 })
                 .catch(reason => {
-                    console.error('Auth error: Not authorized');
-                    res.status(401).send('Auth error: Not authorized');
+                    console.error(reason);
+                    res.status(401).send(reason);
                 });
         } else {
-            console.error('Auth error: No "grant" cookie found');
-            res.status(400).send('Auth error: No valid cookie found')
+            console.error("Bad request - no cookie");
+            res.status(400).send("Bad request");
         }
     }
 }

@@ -12,8 +12,7 @@
     "path": {
         "link": "/auth/nextcloud",
         "unlink": "/auth/nextcloud/unlink",
-        "redirect": "/auth/nextcloud/grant",
-        "proxyPrefix": "/nodejs"
+        "redirect": "/auth/nextcloud/grant"
     },
     "cookieOptionValues": {
         "domain": "nextcloudConfig.cookieData.domain",

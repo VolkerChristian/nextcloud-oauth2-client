@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { NextcloudUser } from './entity/NextcloudUser';
 import cookieParser from 'cookie-parser';
 import * as nextcloudConfig from '../ncconfig.json';
+import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
 
 
 const startUp = new Promise<Router>((resolve, reject) => {
@@ -12,9 +13,9 @@ const startUp = new Promise<Router>((resolve, reject) => {
             const router = Router();
             router.use(cookieParser());
 
-            router.get(nextcloudConfig.path.link, NextcloudUser.oauth2Link);
-            router.get(nextcloudConfig.path.unlink, NextcloudUser.oauth2Unlink);
-            router.get(nextcloudConfig.path.redirect, NextcloudUser.oauth2Redirect);
+            router.get(nextcloudConfig.path.link, oauth2Link);
+            router.get(nextcloudConfig.path.unlink, oauth2Unlink);
+            router.get(nextcloudConfig.path.redirect, oauth2Redirect);
 
             resolve(router);
         })

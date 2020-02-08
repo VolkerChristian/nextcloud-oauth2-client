@@ -30,7 +30,8 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
     }
     user.updateToken(token.data);
 
-    getConnection('nextcloud').getRepository(NextcloudUser).save(user)
+    getConnection('nextcloud').getRepository(NextcloudUser)
+        .save(user)
         .then(() => {
             console.log('User "' + token.data.user_id + '" linked');
             res.status(201).send('User "' + token.data.user_id + '" linked');
@@ -44,7 +45,8 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
 
 export function unlinkRequestHandler(_req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (user) {
-        getConnection('nextcloud').getRepository(NextcloudUser).remove(user)
+        getConnection('nextcloud').getRepository(NextcloudUser)
+            .remove(user)
             .then(() => {
                 console.log('User "' + token.data.user_id + '" unlinked');
                 res.status(201).send('User "' + token.data.user_id + '" unlinked');

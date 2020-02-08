@@ -3,7 +3,7 @@ import { createConnection } from 'typeorm';
 import { Router } from 'express';
 import { NextcloudUser } from './entity/NextcloudUser';
 import cookieParser from 'cookie-parser';
-import * as nextcloudConfig from '../ncconfig.json';
+import nextcloudConfig from '../ncconfig.json';
 import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
 
 

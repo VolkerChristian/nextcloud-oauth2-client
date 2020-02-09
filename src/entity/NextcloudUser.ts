@@ -97,6 +97,16 @@ export class NextcloudUser {
                 .catch((reason) => reject(reason))
         });
     }
+    
+
+    static save(user: NextcloudUser) {
+        return new Promise<NextcloudUser>((resolve, reject) => {
+            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
+                .save(user)
+                .then((user) => resolve(user))
+                .catch((reason) => reject(reason));
+        })
+    }
 
 
     private getToken(): Promise<ClientOAuth2.Token> {

@@ -2,10 +2,11 @@ import 'reflect-metadata';
 import express, { Router } from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
-import { startUp, NextcloudUser } from './index';
+
+import { ncStartUp, NextcloudUser } from './index';
 
 
-startUp.then((router: Router) => {
+ncStartUp().then((router: Router) => {
     const app = express();
     app.use('/', router);
     try {

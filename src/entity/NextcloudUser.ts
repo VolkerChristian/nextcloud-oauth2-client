@@ -8,7 +8,7 @@ import {
     CreateDateColumn,
     VersionColumn,
     OneToOne,
-    getConnection
+    getRepository
 } from 'typeorm';
 import {
     NextcloudToken
@@ -62,7 +62,7 @@ export class NextcloudUser {
 
     static getUser(userName: string) {
         return new Promise<NextcloudUser>((resolve, reject) => {
-            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
+            getRepository<NextcloudUser>('NextcloudUser')
                 .createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
@@ -84,7 +84,7 @@ export class NextcloudUser {
 
     static getAllUser() {
         return new Promise<NextcloudUser[]>((resolve, reject) => {
-            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
+            getRepository<NextcloudUser>('NextcloudUser')
                 .createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
@@ -97,11 +97,11 @@ export class NextcloudUser {
                 .catch((reason) => reject(reason))
         });
     }
-    
+
 
     static save(user: NextcloudUser) {
         return new Promise<NextcloudUser>((resolve, reject) => {
-            getConnection('nextcloud').getRepository<NextcloudUser>('NextcloudUser')
+            getRepository<NextcloudUser>('NextcloudUser')
                 .save(user)
                 .then((user) => resolve(user))
                 .catch((reason) => reject(reason));
@@ -121,7 +121,7 @@ export class NextcloudUser {
                 token.refresh()
                     .then(token => {
                         this.updateToken(token.data);
-                        getConnection('nextcloud').createEntityManager().save(this)
+                        getRepository<NextcloudUser>('NextcloudUser').save(this)
                             .then(() => resolve(token))
                             .catch(reason => reject(reason));
                     })

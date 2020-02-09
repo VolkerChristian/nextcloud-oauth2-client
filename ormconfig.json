@@ -1,5 +1,4 @@
 {
-   "name": "nextcloud",
    "type": "mysql",
    "host": "proliant.home.vchrist.at",
    "port": 3306,

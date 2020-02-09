@@ -1,7 +1,7 @@
 
 import { NextcloudUser, getNextcloudAuth } from './entity/NextcloudUser';
 import ClientOAuth2 from 'client-oauth2';
-import { getConnection } from 'typeorm';
+import { getRepository } from 'typeorm';
 import {
     Request,
     Response
@@ -30,7 +30,7 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
     }
     user.updateToken(token.data);
 
-    getConnection('nextcloud').getRepository(NextcloudUser)
+    getRepository(NextcloudUser)
         .save(user)
         .then(() => {
             console.log('User "' + token.data.user_id + '" linked');
@@ -45,7 +45,7 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
 
 export function unlinkRequestHandler(_req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (user) {
-        getConnection('nextcloud').getRepository(NextcloudUser)
+        getRepository(NextcloudUser)
             .remove(user)
             .then(() => {
                 console.log('User "' + token.data.user_id + '" unlinked');

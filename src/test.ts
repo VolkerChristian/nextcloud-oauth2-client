@@ -3,12 +3,14 @@ import express, { Router } from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
 
-import { ncStartUp, NextcloudUser } from './index';
+import { router, NextcloudUser } from './index';
+import { createConnection } from 'typeorm';
 
+const app = express();
 
-ncStartUp().then((router: Router) => {
-    const app = express();
-    app.use('/', router);
+app.use('/', router);
+
+createConnection().then(connection => {
     try {
         app.listen(8080, async err => {
             if (!err) {
@@ -66,4 +68,4 @@ ncStartUp().then((router: Router) => {
     } catch (reason) {
         console.error('Server Error: ' + reason);
     }
-}).catch(reason => console.error(reason));
+});

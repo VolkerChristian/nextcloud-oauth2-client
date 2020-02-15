@@ -6,13 +6,13 @@ import nextcloudConfig from '../ncconfig.json';
 import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
 
 
-    const router = Router();
+const router = Router();
 
-    router.use(cookieParser());
+router.use(cookieParser());
 
-    router.get(nextcloudConfig.path.link, oauth2Link);
-    router.get(nextcloudConfig.path.unlink, oauth2Unlink);
-    router.get(nextcloudConfig.path.redirect, oauth2Redirect);
+router.get(nextcloudConfig.path.link, oauth2Link);
+router.get(nextcloudConfig.path.unlink, oauth2Unlink);
+router.get(nextcloudConfig.path.redirect, oauth2Redirect);
 
 
 export {

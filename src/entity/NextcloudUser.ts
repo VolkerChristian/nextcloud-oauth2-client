@@ -28,10 +28,12 @@ export function getNextcloudAuth(): ClientOAuth2 {
 export class NextcloudUser {
     constructor(userName: string) {
         this.userName = userName;
-        this.token = new NextcloudToken();
     }
 
     updateToken(tokenData: ClientOAuth2.Data) {
+        if (!this.token) {
+            this.token = new NextcloudToken();
+        }
         this.token.accessToken = tokenData.access_token;
         this.token.refreshToken = tokenData.refresh_token;
         this.token.expiresIn = tokenData.expires_in;
@@ -111,23 +113,27 @@ export class NextcloudUser {
 
     private getToken(): Promise<ClientOAuth2.Token> {
         return new Promise((resolve, reject) => {
-            const token = nextcloudAuth.createToken({
-                access_token: this.token.accessToken,
-                refresh_token: this.token.refreshToken,
-                token_type: this.token.tokenType,
-                expires_in: this.token.expiresIn
-            });
-            if (token.expired()) {
-                token.refresh()
-                    .then(token => {
-                        this.updateToken(token.data);
-                        getRepository<NextcloudUser>('NextcloudUser').save(this)
-                            .then(() => resolve(token))
-                            .catch(reason => reject(reason));
-                    })
-                    .catch(reason => reject(reason));
+            if (this.token) {
+                const token = nextcloudAuth.createToken({
+                    access_token: this.token.accessToken,
+                    refresh_token: this.token.refreshToken,
+                    token_type: this.token.tokenType,
+                    expires_in: this.token.expiresIn
+                });
+                if (token.expired()) {
+                    token.refresh()
+                        .then(token => {
+                            this.updateToken(token.data);
+                            getRepository<NextcloudUser>('NextcloudUser').save(this)
+                                .then(() => resolve(token))
+                                .catch(reason => reject(reason));
+                        })
+                        .catch(reason => reject(reason));
+                } else {
+                    resolve(token);
+                }
             } else {
-                resolve(token);
+                reject("ERROR: Application-User not linked to Nextcloud");
             }
         });
     }

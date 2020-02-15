@@ -14,7 +14,7 @@ import { NextcloudUser } from './NextcloudUser';
 export class NextcloudToken {
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     @Column('varchar', { length: 1024 })
     accessToken: string;
 
@@ -26,21 +26,13 @@ export class NextcloudToken {
 
     @Column('datetime')
     private expires: Date;
-    
-    set expiresIn(expiresIn: string) {
-        this.expires = new Date((Date.now() / 1000 + +expiresIn) * 1000);
-    }
-
-    get expiresIn(): string {
-        return ((this.expires.valueOf() - Date.now()) / 1000 - 300).toString();
-    }
 
     @UpdateDateColumn()
     changed: Date;
 
     @CreateDateColumn()
     created: Date;
-    
+
     @VersionColumn()
     version: Number;
 
@@ -49,4 +41,13 @@ export class NextcloudToken {
     })
     @JoinColumn()
     user: NextcloudUser;
+
+
+    set expiresIn(expiresIn: string) {
+        this.expires = new Date((Date.now() / 1000 + +expiresIn) * 1000);
+    }
+
+    get expiresIn(): string {
+        return (((this.expires.valueOf() - Date.now()) / 1000 - 300)|0).toString();
+    }
 }

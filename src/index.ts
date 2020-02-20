@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { Router } from 'express';
 import { NextcloudUser } from './entity/NextcloudUser';
+import { NextcloudToken } from './entity/NextcloudToken';
 import cookieParser from 'cookie-parser';
 import nextcloudConfig from '../ncconfig.json';
 import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
@@ -17,5 +18,6 @@ router.get(nextcloudConfig.path.redirect, oauth2Redirect);
 
 export {
     router,
-    NextcloudUser
+    NextcloudUser,
+    NextcloudToken
 }

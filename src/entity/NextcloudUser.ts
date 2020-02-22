@@ -1,4 +1,3 @@
-require('reflect-metadata');
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -14,7 +13,7 @@ import {
     NextcloudToken
 } from './NextcloudToken';
 import ClientOAuth2, { RequestObject } from 'client-oauth2';
-import nextcloudConfig from '../../ncconfig.json';
+import nextcloudConfig from '../ncconfig.json';
 
 
 const nextcloudAuth: ClientOAuth2 = new ClientOAuth2(nextcloudConfig.oauth2Config);
@@ -60,55 +59,6 @@ export class NextcloudUser {
         cascade: ['insert', 'update']
     })
     token: NextcloudToken;
-
-
-    static getUser(userName: string) {
-        return new Promise<NextcloudUser>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .createQueryBuilder('user')
-                .leftJoinAndMapOne(
-                    'user.token',
-                    NextcloudToken,
-                    'token',
-                    'token.userId = user.id'
-                )
-                .where(
-                    'user.userName = :userName', { userName: userName }
-                )
-                .getOne()
-                .then((user) => {
-                    resolve(user)
-                })
-                .catch((reason) => reject(reason))
-        });
-    }
-
-
-    static getAllUser() {
-        return new Promise<NextcloudUser[]>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .createQueryBuilder('user')
-                .leftJoinAndMapOne(
-                    'user.token',
-                    NextcloudToken,
-                    'token',
-                    'token.userId = user.id'
-                )
-                .getMany()
-                .then((user) => resolve(user))
-                .catch((reason) => reject(reason))
-        });
-    }
-
-
-    static save(user: NextcloudUser) {
-        return new Promise<NextcloudUser>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .save(user)
-                .then((user) => resolve(user))
-                .catch((reason) => reject(reason));
-        })
-    }
 
 
     private getToken(): Promise<ClientOAuth2.Token> {

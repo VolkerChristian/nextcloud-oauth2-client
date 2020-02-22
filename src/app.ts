@@ -3,7 +3,7 @@ import express, { Router } from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
 
-import { router, NextcloudUser } from './index';
+import { router, NextcloudUser, getNextcloudUserRepository } from './index';
 import { createConnection } from 'typeorm';
 
 const app = express();
@@ -16,14 +16,14 @@ createConnection().then(connection => {
             if (!err) {
                 console.log('Server listening on 8080');
 
-                const user = await NextcloudUser.getAllUser();
+                const user = await getNextcloudUserRepository().getAllUser();
                 console.log('User: ' + JSON.stringify(user, null, 4));
 
 
                 app.get('/test', async (req, res) => {
                     console.log('PC: Looking for registered user');
 
-                    let user = await NextcloudUser.getAllUser();
+                    let user = await getNextcloudUserRepository().getAllUser();
 
                     user.forEach(async user => {
                         console.log('Processing user "' + user.userName + '"');

@@ -7,7 +7,8 @@ import {
     Response
 } from 'express';
 import uuid = require('uuid');
-import nextcloudConfig from '../ncconfig.json';
+import nextcloudConfig from './ncconfig.json';
+import { getNextcloudUserRepository } from '.';
 
 interface Handler {
     (req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token): void;
@@ -108,7 +109,7 @@ export function oauth2Redirect(req: Request, res: Response) {
 
         getNextcloudAuth().code.getToken(req.originalUrl, { state: state })
             .then(token => {
-                NextcloudUser.getUser(token.data.user_id)
+                getNextcloudUserRepository().getUser(token.data.user_id)
                     .then(user => {
                         cookieData.handler(req, res, user, token);
                     })

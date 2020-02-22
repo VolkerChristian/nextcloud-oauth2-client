@@ -9,11 +9,22 @@
       "module": "commonjs",
       "moduleResolution": "node",
       "outDir": "./build",
+      "rootDir": "./src",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "resolveJsonModule": true,
       "esModuleInterop": true,
-      "sourceMap": true,
-      "forceConsistentCasingInFileNames": true
-   }
+      "forceConsistentCasingInFileNames": true,
+      "declaration": true,
+      "declarationMap": true,
+      "inlineSourceMap": true,
+      "inlineSources": true
+   },
+   "include": [
+      "src/**/*",
+   ],
+   "exclude": [
+      "**/*.d.ts",
+      "node_modules"
+   ]
 }

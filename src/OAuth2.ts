@@ -1,14 +1,13 @@
 
 import { NextcloudUser, getNextcloudAuth } from './entity/NextcloudUser';
 import ClientOAuth2 from 'client-oauth2';
-import { getRepository } from 'typeorm';
 import {
     Request,
     Response
 } from 'express';
 import uuid = require('uuid');
 import nextcloudConfig from './ncconfig.json';
-import { getNextcloudUserRepository } from '.';
+import { getNextcloudUserRepository } from './';
 
 interface Handler {
     (req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token): void;
@@ -25,13 +24,13 @@ interface CookieStore {
 };
 
 
-export function linkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+function linkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (!user) {
         user = new NextcloudUser(token.data.user_id);
     }
     user.updateToken(token.data);
 
-    getRepository(NextcloudUser)
+    getNextcloudUserRepository()
         .save(user)
         .then(() => {
             console.log('User "' + token.data.user_id + '" linked');
@@ -44,9 +43,9 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
 }
 
 
-export function unlinkRequestHandler(_req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+function unlinkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (user) {
-        getRepository(NextcloudUser)
+        getNextcloudUserRepository()
             .remove(user)
             .then(() => {
                 console.log('User "' + token.data.user_id + '" unlinked');

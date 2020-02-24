@@ -1,21 +1,38 @@
-import 'reflect-metadata';
-import express, { Router } from 'express';
+import express from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
 
-import { router, NextcloudUser, getNextcloudUserRepository } from './index';
-import { createConnection } from 'typeorm';
+import { router, connect, getNextcloudUserRepository, getEntities } from './';
+import { createConnection, Connection } from 'typeorm';
 
 const app = express();
 
 app.use('/', router);
 
-createConnection().then(connection => {
+/*
+var _connection: Connection;
+
+export async function myConnect() {
+    _connection = await createConnection({
+        type: "mysql",
+        host: "proliant.home.vchrist.at",
+        port: 3306,
+        username: "wastereminder",
+        password: "!!!SoMaSi01!!!",
+        database: "WasteReminder",
+        synchronize: true,
+        logging: false,
+        entities: getEntities()
+    });
+}
+*/
+
+connect().then(() => {
     try {
         app.listen(8080, async err => {
             if (!err) {
                 console.log('Server listening on 8080');
-
+                
                 const user = await getNextcloudUserRepository().getAllUser();
                 console.log('User: ' + JSON.stringify(user, null, 4));
 

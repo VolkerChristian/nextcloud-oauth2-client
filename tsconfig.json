@@ -21,7 +21,7 @@
       "inlineSources": true
    },
    "include": [
-      "src/**/*",
+      "src/**/*"
    ],
    "exclude": [
       "**/*.d.ts",

@@ -6,7 +6,7 @@ import { NextcloudToken } from './entity/NextcloudToken';
 export class NextcloudUserRepository extends Repository<NextcloudUser> {
     getUser(userName: string) {
         return new Promise<NextcloudUser>((resolve, reject) => {
-            this.createQueryBuilder()
+            this.createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
                     NextcloudToken,
@@ -17,16 +17,14 @@ export class NextcloudUserRepository extends Repository<NextcloudUser> {
                     'user.userName = :userName', { userName: userName }
                 )
                 .getOne()
-                .then((user) => {
-                    resolve(user)
-                })
-                .catch((reason) => reject(reason))
+                .then(user => resolve(user))
+                .catch(reason => reject(reason))
         });
     }
 
     getAllUser() {
         return new Promise<NextcloudUser[]>((resolve, reject) => {
-            this.createQueryBuilder()
+            this.createQueryBuilder('user')
                 .leftJoinAndMapOne(
                     'user.token',
                     NextcloudToken,
@@ -34,8 +32,8 @@ export class NextcloudUserRepository extends Repository<NextcloudUser> {
                     'token.userId = user.id'
                 )
                 .getMany()
-                .then((user) => resolve(user))
-                .catch((reason) => reject(reason))
+                .then(user => resolve(user))
+                .catch(reason => reject(reason))
         });
     }
 }

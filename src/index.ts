@@ -3,14 +3,14 @@ import 'reflect-metadata';
 import { Router } from 'express';
 import { NextcloudUser } from './entity/NextcloudUser';
 import { NextcloudToken } from './entity/NextcloudToken';
-export { NextcloudUser } from './entity/NextcloudUser';
-export { NextcloudToken } from './entity/NextcloudToken';
 import cookieParser from 'cookie-parser';
 import nextcloudConfig from './ncconfig.json';
 import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
-import { createConnection, Connection } from 'typeorm';
+import { createConnection, Connection, getConnection } from 'typeorm';
 import { NextcloudUserRepository } from './NextcloudUserRepository';
 
+export { NextcloudUser } from './entity/NextcloudUser';
+export { NextcloudToken } from './entity/NextcloudToken';
 
 export const router = Router();
 
@@ -51,4 +51,8 @@ export function connected() {
 
 export function getNextcloudUserRepository(): NextcloudUserRepository {
     return _connection.getCustomRepository(NextcloudUserRepository);
+}
+
+export function getEntities() {
+    return [NextcloudUser, NextcloudToken];
 }

@@ -32,10 +32,7 @@ export async function connect() {
         database: "WasteReminder",
         synchronize: true,
         logging: false,
-        entities: [
-            NextcloudUser,
-            NextcloudToken
-        ]
+        entities: getEntities()
     });
 }
 
@@ -55,4 +52,8 @@ export function getNextcloudUserRepository(): NextcloudUserRepository {
 
 export function getEntities() {
     return [NextcloudUser, NextcloudToken];
+}
+
+export function setConnection(connection: Connection) {
+    _connection = connection;
 }

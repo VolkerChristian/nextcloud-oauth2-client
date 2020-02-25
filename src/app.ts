@@ -2,18 +2,15 @@ import express from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
 
-import { router, connect, getNextcloudUserRepository, getEntities } from './';
-import { createConnection, Connection } from 'typeorm';
+import { router, getNextcloudUserRepository, getEntities, setConnection } from './';
+import { createConnection } from 'typeorm';
 
 const app = express();
 
 app.use('/', router);
 
-/*
-var _connection: Connection;
-
-export async function myConnect() {
-    _connection = await createConnection({
+export async function connect() {
+    let connection = await createConnection({
         type: "mysql",
         host: "proliant.home.vchrist.at",
         port: 3306,
@@ -24,10 +21,13 @@ export async function myConnect() {
         logging: false,
         entities: getEntities()
     });
-}
-*/
 
-connect().then(() => {
+    return connection;
+}
+
+
+connect().then((connection) => {
+    setConnection(connection);
     try {
         app.listen(8080, async err => {
             if (!err) {

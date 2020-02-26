@@ -6,13 +6,13 @@ import { NextcloudToken } from './entity/NextcloudToken';
 import cookieParser from 'cookie-parser';
 import nextcloudConfig from './ncconfig.json';
 import { oauth2Link, oauth2Unlink, oauth2Redirect } from './OAuth2';
-import { createConnection, Connection, getConnection } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 import { NextcloudUserRepository } from './NextcloudUserRepository';
 
 export { NextcloudUser } from './entity/NextcloudUser';
 export { NextcloudToken } from './entity/NextcloudToken';
 
-export const router = Router();
+export const router: Router = Router();
 
 router.use(cookieParser());
 

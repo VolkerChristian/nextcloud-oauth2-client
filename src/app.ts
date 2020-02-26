@@ -3,14 +3,14 @@ import request from 'request';
 import ICAL from 'ical.js';
 
 import { router, getNextcloudUserRepository, getEntities, setConnection } from './';
-import { createConnection } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 
 const app = express();
 
 app.use('/', router);
 
-export async function connect() {
-    let connection = await createConnection({
+export function connect() : Promise<Connection> {
+    return createConnection({
         type: "mysql",
         host: "proliant.home.vchrist.at",
         port: 3306,
@@ -21,8 +21,6 @@ export async function connect() {
         logging: false,
         entities: getEntities()
     });
-
-    return connection;
 }
 
 

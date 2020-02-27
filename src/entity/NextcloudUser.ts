@@ -13,13 +13,16 @@ import {
     NextcloudToken
 } from './NextcloudToken';
 import ClientOAuth2, { RequestObject } from 'client-oauth2';
-import nextcloudConfig from '../ncconfig.json';
 
 
-const nextcloudAuth: ClientOAuth2 = new ClientOAuth2(nextcloudConfig.oauth2Config);
+let nextcloudAuth: ClientOAuth2; // = new ClientOAuth2(nextcloudConfig.oauth2Config);
 
 export function getNextcloudAuth(): ClientOAuth2 {
     return nextcloudAuth;
+}
+
+export function setNextcloudAuth(oAuth2Config: ClientOAuth2.Options) {
+    nextcloudAuth = new ClientOAuth2(oAuth2Config);
 }
 
 

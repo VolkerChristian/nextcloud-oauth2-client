@@ -6,7 +6,6 @@ import {
     Response
 } from 'express';
 import uuid = require('uuid');
-import nextcloudConfig from './ncconfig.json';
 import { getNextcloudUserRepository } from './';
 
 interface Handler {
@@ -66,7 +65,7 @@ const cookieStore: CookieStore = {};
 
 export function oauth2AuthRedirect(_req: Request, res: Response, handler: Handler) {
     const cookie = uuid();
-    res.cookie('auth', cookie, nextcloudConfig.cookieOptions);
+    res.cookie('auth', cookie, _cookieOptions);
 
     const timeout = setTimeout(cookie => {
         console.log('Cookie ' + cookie + ' expired.');
@@ -98,7 +97,7 @@ export function oauth2Unlink(req: Request, res: Response) {
 
 export function oauth2Redirect(req: Request, res: Response) {
     if (req.cookies.auth && cookieStore[req.cookies.auth]) {
-        res.clearCookie('auth', nextcloudConfig.cookieOptions);
+        res.clearCookie('auth', _cookieOptions);
 
         const cookieData = cookieStore[req.cookies.auth];
         delete cookieStore[req.cookies.auth];
@@ -125,4 +124,10 @@ export function oauth2Redirect(req: Request, res: Response) {
         console.error("Bad request - no cookie");
         res.status(400).send("Bad request");
     }
+}
+
+let _cookieOptions;
+
+export function setCookieOptions(cookieOptions) {
+    _cookieOptions = cookieOptions;
 }

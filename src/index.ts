@@ -61,5 +61,4 @@ export function getEntities() {
 
 export function setConnection(connection: Connection) {
     _connection = connection;
-    console.log("Set Connection: " + util.inspect(_connection));
 }

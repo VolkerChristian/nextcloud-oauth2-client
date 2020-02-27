@@ -6,6 +6,7 @@
       "@types/body-parser": "^1.17.1",
       "@types/cookie-parser": "^1.4.2",
       "@types/express": "^4.17.2",
+      "@types/jest": "^25.1.3",
       "@types/node": "^8.0.29",
       "@types/request": "^2.48.4",
       "@types/uuid": "^3.4.7",
@@ -15,7 +16,6 @@
       "typescript": "3.3.3333"
    },
    "dependencies": {
-      "@types/jest": "^25.1.3",
       "body-parser": "^1.19.0",
       "client-oauth2": "^4.2.5",
       "cookie-parser": "^1.4.4",
@@ -32,6 +32,10 @@
       "build": "tsc -p ./tsconfig.json",
       "test": "jest"
    },
-   "main": "./build/index.js",
-   "types": "./build/index.d.ts"
+   "main": "build/index",
+   "typings": "build/index",
+   "files": [
+      "src",
+      "build"
+   ]
 }

@@ -7,7 +7,6 @@ import cookieParser from 'cookie-parser';
 import { oauth2Link, oauth2Unlink, oauth2Redirect, setCookieOptions } from './OAuth2';
 import { createConnection, Connection } from 'typeorm';
 import { NextcloudUserRepository } from './NextcloudUserRepository';
-import ClientOAuth2 from 'client-oauth2';
 
 export { NextcloudUser } from './entity/NextcloudUser';
 export { NextcloudToken } from './entity/NextcloudToken';

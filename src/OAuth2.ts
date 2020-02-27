@@ -80,6 +80,7 @@ export function oauth2AuthRedirect(_req: Request, res: Response, handler: Handle
 
     console.log('Response auth-cookie: ' + JSON.stringify(cookie, null, 4));
     console.log('Response state of auth-cookie: ' + JSON.stringify(cookieStore[cookie].state, null, 4));
+    console.log('CookieOptions: ' + JSON.stringify(_cookieOptions));
 
     res.redirect(getNextcloudAuth().code.getUri({ state: cookieStore[cookie].state }));
 }
@@ -96,6 +97,7 @@ export function oauth2Unlink(req: Request, res: Response) {
 
 
 export function oauth2Redirect(req: Request, res: Response) {
+    console.log("Cookie Auth: " + req.cookies.auth);
     if (req.cookies.auth && cookieStore[req.cookies.auth]) {
         res.clearCookie('auth', _cookieOptions);
 

@@ -16,7 +16,7 @@ export const router: Router = Router();
 
 router.use(cookieParser());
 
-var _connection: Connection;
+let _connection: Connection;
 
 export async function connect() {
     _connection = await createConnection({
@@ -61,4 +61,5 @@ export function getEntities() {
 
 export function setConnection(connection: Connection) {
     _connection = connection;
+    console.log("Set Connection: " + util.inspect(_connection));
 }

@@ -2,8 +2,9 @@ import express from 'express';
 import request from 'request';
 import ICAL from 'ical.js';
 
-import { router, getNextcloudUserRepository, getEntities, setConnection } from './';
+import { router, getNextcloudUserRepository, getEntities, setConnection, setNextcloudConfig } from './';
 import { createConnection, Connection } from 'typeorm';
+import ncConfig from './ncconfig.json';
 
 const app = express();
 
@@ -26,9 +27,9 @@ export function connect() : Promise<Connection> {
 
 connect().then((connection) => {
     setConnection(connection);
+    setNextcloudConfig(ncConfig);
     try {
-        app.listen(8080, async err => {
-            if (!err) {
+        app.listen(8080, async () => {
                 console.log('Server listening on 8080');
                 
                 const user = await getNextcloudUserRepository().getAllUser();
@@ -42,7 +43,7 @@ connect().then((connection) => {
 
                     user.forEach(async user => {
                         console.log('Processing user "' + user.userName + '"');
-                        var rec = await user.sign({
+                        let req = await user.sign({
                             url: 'https://cloud.vchrist.at/remote.php/dav/calendars/'
                                 + user.userName
                                 + '/mllabfuhr/?export'
@@ -54,7 +55,7 @@ connect().then((connection) => {
                             }
                         });
 
-                        request(rec, (error, response, body) => {
+                        request(req, (error, response, body) => {
                             if (!error) {
                                 let str = '';
                                 let iCalData = JSON.parse(body);
@@ -76,9 +77,6 @@ connect().then((connection) => {
                         });
                     });
                 });
-            } else {
-                console.error('Server Error: ' + err);
-            }
         });
     } catch (reason) {
         console.error('Server Error: ' + reason);

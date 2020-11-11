@@ -15,5 +15,5 @@ describe('Connection test', () => {
 
     test('Check Connection', () => {
         expect(connected()).toBeTruthy();
-    });
+    })
 });

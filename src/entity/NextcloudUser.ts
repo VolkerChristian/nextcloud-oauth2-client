@@ -64,7 +64,7 @@ export class NextcloudUser {
     token: NextcloudToken;
 
 
-    private getToken(): Promise<ClientOAuth2.Token> {
+    getToken(): Promise<ClientOAuth2.Token> {
         return new Promise((resolve, reject) => {
             if (this.token) {
                 const token = nextcloudAuth.createToken({

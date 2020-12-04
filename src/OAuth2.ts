@@ -1,13 +1,12 @@
 
 import { NextcloudUser, getNextcloudAuth } from './entity/NextcloudUser';
 import ClientOAuth2 from 'client-oauth2';
-import { getRepository } from 'typeorm';
 import {
     Request,
     Response
 } from 'express';
 import uuid = require('uuid');
-import nextcloudConfig from '../ncconfig.json';
+import { getNextcloudUserRepository } from './';
 
 interface Handler {
     (req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token): void;
@@ -24,13 +23,13 @@ interface CookieStore {
 };
 
 
-export function linkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+function linkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (!user) {
         user = new NextcloudUser(token.data.user_id);
     }
     user.updateToken(token.data);
 
-    getRepository(NextcloudUser)
+    getNextcloudUserRepository()
         .save(user)
         .then(() => {
             console.log('User "' + token.data.user_id + '" linked');
@@ -43,9 +42,9 @@ export function linkRequestHandler(req: Request, res: Response, user: NextcloudU
 }
 
 
-export function unlinkRequestHandler(_req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
+function unlinkRequestHandler(req: Request, res: Response, user: NextcloudUser, token: ClientOAuth2.Token) {
     if (user) {
-        getRepository(NextcloudUser)
+        getNextcloudUserRepository()
             .remove(user)
             .then(() => {
                 console.log('User "' + token.data.user_id + '" unlinked');
@@ -66,7 +65,7 @@ const cookieStore: CookieStore = {};
 
 export function oauth2AuthRedirect(_req: Request, res: Response, handler: Handler) {
     const cookie = uuid();
-    res.cookie('auth', cookie, nextcloudConfig.cookieOptions);
+    res.cookie('auth', cookie, _cookieOptions);
 
     const timeout = setTimeout(cookie => {
         console.log('Cookie ' + cookie + ' expired.');
@@ -81,6 +80,7 @@ export function oauth2AuthRedirect(_req: Request, res: Response, handler: Handle
 
     console.log('Response auth-cookie: ' + JSON.stringify(cookie, null, 4));
     console.log('Response state of auth-cookie: ' + JSON.stringify(cookieStore[cookie].state, null, 4));
+    console.log('CookieOptions: ' + JSON.stringify(_cookieOptions));
 
     res.redirect(getNextcloudAuth().code.getUri({ state: cookieStore[cookie].state }));
 }
@@ -97,8 +97,9 @@ export function oauth2Unlink(req: Request, res: Response) {
 
 
 export function oauth2Redirect(req: Request, res: Response) {
+    console.log("Cookie Auth: " + req.cookies.auth);
     if (req.cookies.auth && cookieStore[req.cookies.auth]) {
-        res.clearCookie('auth', nextcloudConfig.cookieOptions);
+        res.clearCookie('auth', _cookieOptions);
 
         const cookieData = cookieStore[req.cookies.auth];
         delete cookieStore[req.cookies.auth];
@@ -108,7 +109,7 @@ export function oauth2Redirect(req: Request, res: Response) {
 
         getNextcloudAuth().code.getToken(req.originalUrl, { state: state })
             .then(token => {
-                NextcloudUser.getUser(token.data.user_id)
+                getNextcloudUserRepository().getUser(token.data.user_id)
                     .then(user => {
                         cookieData.handler(req, res, user, token);
                     })
@@ -125,4 +126,10 @@ export function oauth2Redirect(req: Request, res: Response) {
         console.error("Bad request - no cookie");
         res.status(400).send("Bad request");
     }
+}
+
+let _cookieOptions;
+
+export function setCookieOptions(cookieOptions) {
+    _cookieOptions = cookieOptions;
 }

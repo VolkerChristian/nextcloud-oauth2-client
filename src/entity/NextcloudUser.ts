@@ -1,4 +1,3 @@
-require('reflect-metadata');
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -14,13 +13,16 @@ import {
     NextcloudToken
 } from './NextcloudToken';
 import ClientOAuth2, { RequestObject } from 'client-oauth2';
-import nextcloudConfig from '../../ncconfig.json';
 
 
-const nextcloudAuth: ClientOAuth2 = new ClientOAuth2(nextcloudConfig.oauth2Config);
+let nextcloudAuth: ClientOAuth2; // = new ClientOAuth2(nextcloudConfig.oauth2Config);
 
 export function getNextcloudAuth(): ClientOAuth2 {
     return nextcloudAuth;
+}
+
+export function setNextcloudAuth(oAuth2Config: ClientOAuth2.Options) {
+    nextcloudAuth = new ClientOAuth2(oAuth2Config);
 }
 
 
@@ -62,56 +64,7 @@ export class NextcloudUser {
     token: NextcloudToken;
 
 
-    static getUser(userName: string) {
-        return new Promise<NextcloudUser>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .createQueryBuilder('user')
-                .leftJoinAndMapOne(
-                    'user.token',
-                    NextcloudToken,
-                    'token',
-                    'token.userId = user.id'
-                )
-                .where(
-                    'user.userName = :userName', { userName: userName }
-                )
-                .getOne()
-                .then((user) => {
-                    resolve(user)
-                })
-                .catch((reason) => reject(reason))
-        });
-    }
-
-
-    static getAllUser() {
-        return new Promise<NextcloudUser[]>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .createQueryBuilder('user')
-                .leftJoinAndMapOne(
-                    'user.token',
-                    NextcloudToken,
-                    'token',
-                    'token.userId = user.id'
-                )
-                .getMany()
-                .then((user) => resolve(user))
-                .catch((reason) => reject(reason))
-        });
-    }
-
-
-    static save(user: NextcloudUser) {
-        return new Promise<NextcloudUser>((resolve, reject) => {
-            getRepository<NextcloudUser>('NextcloudUser')
-                .save(user)
-                .then((user) => resolve(user))
-                .catch((reason) => reject(reason));
-        })
-    }
-
-
-    private getToken(): Promise<ClientOAuth2.Token> {
+    getToken(): Promise<ClientOAuth2.Token> {
         return new Promise((resolve, reject) => {
             if (this.token) {
                 const token = nextcloudAuth.createToken({

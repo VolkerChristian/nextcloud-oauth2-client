@@ -1,12 +1,4 @@
 {
-    "defunct-oauth2Config": {
-        "clientId": "kN3HXYKqIvoXFJD6maV56WAI9moMbvxIx68rqiRjwSc6f9G7aNvK3oAXSZ4wNHo8",
-        "clientSecret": "Z5bv7HAyCMnoC2o7oLDbS114suHHnHesBEMptvs7TemYv5NgR4dV9gOgnrhO5KHL",
-        "accessTokenUri": "https://cloud.vchrist.at/index.php/apps/oauth2/api/v1/token",
-        "authorizationUri": "https://cloud.vchrist.at/index.php/apps/oauth2/authorize",
-        "redirectUri": "http://calisto.home.vchrist.at:8080/auth/nextcloud/grant",
-        "scopes": []
-    },
     "oauth2Config": {
         "clientId": "UjBsDWcsbl5hnl0vNqAop7emLQrtEEvacbnJKCmnx2g43T0m7HK0iTrS4LWdFOXp",
         "clientSecret": "M9Go6AyMBWS3eOUnmwUSNhqW9EDp8rzQbDn9b2lAle8kXibnGr8AqXHzOaHpXzFY",
@@ -33,11 +25,5 @@
         "expires": "Date.now() + 600000",
         "signed": false,
         "sameSite": false
-    },
-    "aptOAuth2Config": {
-        "accessTokenUri": "https://api.amazon.com/auth/o2/token",
-        "clientId": "amzn1.application-oa2-client.c1494a447d77405883037efdc06baad6",
-        "clientSecret": "07c7affba53c9d2632186cff30c678d5ed243efc6140436c533f2eac32e8dd11",
-        "scopes": ["alexa::proactive_events"]
     }
 }
